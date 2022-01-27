@@ -1,0 +1,4 @@
+/tmp/tmp.oaVSSjbR8j/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/tmp/tmp.oaVSSjbR8j/cmake-build-debug/CMakeFiles/_PW_Collatz.dir
+/tmp/tmp.oaVSSjbR8j/cmake-build-debug/CMakeFiles/edit_cache.dir
+/tmp/tmp.oaVSSjbR8j/cmake-build-debug/CMakeFiles/teams.dir

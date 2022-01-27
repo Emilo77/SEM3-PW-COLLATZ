@@ -1,0 +1,2 @@
+/usr/bin/ar qc libteams.a CMakeFiles/teams.dir/teams.cpp.o
+/usr/bin/ranlib libteams.a
