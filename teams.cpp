@@ -108,9 +108,20 @@ TeamConstThreads::runContestImpl(ContestInput const &contestInput) {
 }
 
 ContestResult TeamPool::runContest(ContestInput const &contestInput) {
-    ContestResult r;
-    //TODO
-    return r;
+    ContestResult result;
+    std::vector<std::future<uint64_t>> futureVector(contestInput.size());
+
+    for (int i = 0; i < contestInput.size(); i++) {
+        futureVector.at(i) = pool.push([contestInput, i] {
+            return calcCollatz(contestInput.at(i));
+        });
+    }
+
+    for (int i = 0; i < contestInput.size(); i++) {
+        result.at(i) = futureVector.at(i).get();
+    }
+
+    return result;
 }
 
 ContestResult TeamNewProcesses::runContest(ContestInput const &contestInput) {
