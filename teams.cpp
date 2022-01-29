@@ -31,7 +31,7 @@ ContestResult TeamNewThreads::runContestImpl(ContestInput const &contestInput) {
         if (threadCount >= getSize()) {
             mutex.lock();
         }
-        threadCount++;
+        threadCount++; // może trzeba to obudowac mutexem z ifem
         auto t = createThread([i, &promiseVector, contestInput,
                                       &threadCount, &mutex, &protection] {
             promiseVector.at(i).set_value(calcCollatz(contestInput.at(i)));
