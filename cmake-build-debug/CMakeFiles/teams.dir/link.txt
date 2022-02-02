@@ -1,2 +1,1 @@
-/usr/bin/ar qc libteams.a CMakeFiles/teams.dir/teams.cpp.o
-/usr/bin/ranlib libteams.a
+/usr/bin/c++ -g -Wall -g -rdynamic CMakeFiles/teams.dir/teams.o -o teams  -lpthread 

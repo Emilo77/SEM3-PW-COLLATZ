@@ -4,7 +4,7 @@ set(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 set(CMAKE_DEPENDS_CHECK_CXX
-  "/tmp/tmp.oaVSSjbR8j/teams.cpp" "/tmp/tmp.oaVSSjbR8j/cmake-build-debug/CMakeFiles/teams.dir/teams.cpp.o"
+  "/tmp/tmp.oaVSSjbR8j/teams.cpp" "/tmp/tmp.oaVSSjbR8j/cmake-build-debug/CMakeFiles/teams.dir/teams.o"
   )
 set(CMAKE_CXX_COMPILER_ID "GNU")
 

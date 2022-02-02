@@ -3,6 +3,7 @@
 
 CMakeFiles/_PW_Collatz.dir/main.cpp.o: ../collatz.hpp
 CMakeFiles/_PW_Collatz.dir/main.cpp.o: ../contest.hpp
+CMakeFiles/_PW_Collatz.dir/main.cpp.o: ../err.h
 CMakeFiles/_PW_Collatz.dir/main.cpp.o: ../generators.hpp
 CMakeFiles/_PW_Collatz.dir/main.cpp.o: ../lib/infint/InfInt.h
 CMakeFiles/_PW_Collatz.dir/main.cpp.o: ../lib/pool/cxxpool.h

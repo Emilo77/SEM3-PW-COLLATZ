@@ -75,6 +75,52 @@ CMAKE_BINARY_DIR = /tmp/tmp.oaVSSjbR8j/cmake-build-debug
 #=============================================================================
 # Targets provided globally by CMake.
 
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
+
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Only default component available"
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+
+.PHONY : list_install_components/fast
+
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
@@ -130,17 +176,17 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named _PW_Collatz
+# Target rules for targets named main
 
 # Build rule for target.
-_PW_Collatz: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 _PW_Collatz
-.PHONY : _PW_Collatz
+main: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 main
+.PHONY : main
 
 # fast build rule for target.
-_PW_Collatz/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/_PW_Collatz.dir/build.make CMakeFiles/_PW_Collatz.dir/build
-.PHONY : _PW_Collatz/fast
+main/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/build
+.PHONY : main/fast
 
 #=============================================================================
 # Target rules for targets named teams
@@ -155,59 +201,35 @@ teams/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/teams.dir/build.make CMakeFiles/teams.dir/build
 .PHONY : teams/fast
 
-main.o: main.cpp.o
-
+# target to build an object file
+main.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.o
 .PHONY : main.o
 
-# target to build an object file
-main.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/_PW_Collatz.dir/build.make CMakeFiles/_PW_Collatz.dir/main.cpp.o
-.PHONY : main.cpp.o
-
-main.i: main.cpp.i
-
+# target to preprocess a source file
+main.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.i
 .PHONY : main.i
 
-# target to preprocess a source file
-main.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/_PW_Collatz.dir/build.make CMakeFiles/_PW_Collatz.dir/main.cpp.i
-.PHONY : main.cpp.i
-
-main.s: main.cpp.s
-
+# target to generate assembly for a file
+main.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/main.dir/build.make CMakeFiles/main.dir/main.s
 .PHONY : main.s
 
-# target to generate assembly for a file
-main.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/_PW_Collatz.dir/build.make CMakeFiles/_PW_Collatz.dir/main.cpp.s
-.PHONY : main.cpp.s
-
-teams.o: teams.cpp.o
-
+# target to build an object file
+teams.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/teams.dir/build.make CMakeFiles/teams.dir/teams.o
 .PHONY : teams.o
 
-# target to build an object file
-teams.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/teams.dir/build.make CMakeFiles/teams.dir/teams.cpp.o
-.PHONY : teams.cpp.o
-
-teams.i: teams.cpp.i
-
+# target to preprocess a source file
+teams.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/teams.dir/build.make CMakeFiles/teams.dir/teams.i
 .PHONY : teams.i
 
-# target to preprocess a source file
-teams.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/teams.dir/build.make CMakeFiles/teams.dir/teams.cpp.i
-.PHONY : teams.cpp.i
-
-teams.s: teams.cpp.s
-
-.PHONY : teams.s
-
 # target to generate assembly for a file
-teams.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/teams.dir/build.make CMakeFiles/teams.dir/teams.cpp.s
-.PHONY : teams.cpp.s
+teams.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/teams.dir/build.make CMakeFiles/teams.dir/teams.s
+.PHONY : teams.s
 
 # Help Target
 help:
@@ -216,8 +238,12 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
 	@echo "... rebuild_cache"
-	@echo "... _PW_Collatz"
+	@echo "... main"
 	@echo "... teams"
 	@echo "... main.o"
 	@echo "... main.i"

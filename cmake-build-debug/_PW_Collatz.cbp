@@ -29,7 +29,7 @@
 			</Target>
 			<Target title="_PW_Collatz">
 				<Option output="/tmp/tmp.oaVSSjbR8j/cmake-build-debug/_PW_Collatz" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/tmp/tmp.oaVSSjbR8j/cmake-build-debug"/>
+				<Option working_dir=""/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>
@@ -52,7 +52,7 @@
 			</Target>
 			<Target title="_PW_Collatz/fast">
 				<Option output="/tmp/tmp.oaVSSjbR8j/cmake-build-debug/_PW_Collatz" prefix_auto="0" extension_auto="0"/>
-				<Option working_dir="/tmp/tmp.oaVSSjbR8j/cmake-build-debug"/>
+				<Option working_dir=""/>
 				<Option object_output="./"/>
 				<Option type="1"/>
 				<Option compiler="gcc"/>

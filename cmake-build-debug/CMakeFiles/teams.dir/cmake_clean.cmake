@@ -1,7 +1,7 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/teams.dir/teams.cpp.o"
-  "libteams.a"
-  "libteams.pdb"
+  "CMakeFiles/teams.dir/teams.o"
+  "teams"
+  "teams.pdb"
 )
 
 # Per-language clean rules from dependency scanning.

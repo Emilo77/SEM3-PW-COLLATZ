@@ -16,6 +16,8 @@ vector
 lib/infint/InfInt.h
 /tmp/tmp.oaVSSjbR8j/lib/infint/InfInt.h
 
+/tmp/tmp.oaVSSjbR8j/err.h
+
 /tmp/tmp.oaVSSjbR8j/generators.hpp
 string
 -
@@ -111,4 +113,6 @@ collatz.hpp
 /tmp/tmp.oaVSSjbR8j/collatz.hpp
 sharedresults.hpp
 /tmp/tmp.oaVSSjbR8j/sharedresults.hpp
+err.h
+/tmp/tmp.oaVSSjbR8j/err.h
 
