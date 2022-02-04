@@ -12,6 +12,33 @@
 #include "sharedresults.hpp"
 #include "err.h"
 
+static void splitWork(const uint32_t contestInputSize, const uint32_t threadNum,
+                      std::vector<uint32_t> &work,
+                      std::vector<std::pair<uint32_t, uint32_t>> &interval) {
+    uint32_t avgWork = contestInputSize / threadNum;
+    if (contestInputSize % threadNum == 0) {
+        std::fill(work.begin(), work.end(), avgWork);
+    } else {
+        avgWork++;
+        std::fill(work.begin(), work.end(), avgWork);
+        uint32_t tempWork = avgWork * threadNum;
+        uint32_t index = 0;
+        while (tempWork > contestInputSize) {
+            work.at(index)--;
+            tempWork--;
+            index++;
+        }
+    }
+
+    uint32_t ind = 0;
+    for (uint32_t i = 0; i < threadNum; i++) {
+        std::pair<uint32_t, uint32_t> newPair = {ind, ind + work.at(i)};
+        interval.push_back(newPair);
+        ind += work.at(i);
+    }
+}
+
+
 class Team {
 public:
     Team(uint32_t sizeArg, bool shareResults) : size(sizeArg), sharedResults() {
@@ -39,7 +66,7 @@ public:
                std::to_string(this->size) + ">";
     }
 
-    uint32_t getSize() const { return this->size; }
+    uint32_t getSize() { return this->size; }
 
 
 private:
@@ -132,7 +159,6 @@ public:
                     }));
             if (threadCount == size) {
                 threads.at(indexToJoin).join();
-                //czy trzeba sprawdzać joinable?
                 indexToJoin++;
                 threadCount--;
             }
@@ -168,46 +194,25 @@ public:
         ContestResult result;
         result.resize(contestInput.size());
 
+        auto threadNum = getSize();
         std::vector<std::promise<uint64_t>> promiseVector(contestInput.size());
         std::vector<std::future<uint64_t>> futureVector;
+        std::vector<uint32_t> work(threadNum);
+        std::vector<std::pair<uint32_t, uint32_t>> interval;
+
 
         for (int i = 0; i < contestInput.size(); i++) {
             futureVector.push_back(promiseVector.at(i).get_future());
         }
 
-        const uint32_t threadNum = getSize();
-        uint32_t avgWork = contestInput.size() / getSize();
-        std::vector<uint32_t> work(threadNum);
-        std::vector<std::pair<uint32_t, uint32_t>> interval;
-
-        if (contestInput.size() % threadNum == 0) {
-            std::fill(work.begin(), work.end(), avgWork);
-        } else {
-            avgWork++;
-            std::fill(work.begin(), work.end(), avgWork);
-            uint32_t tempWork = avgWork * threadNum;
-            uint32_t index = 0;
-            while (tempWork > contestInput.size()) {
-                work.at(index)--;
-                tempWork--;
-                index++;
-            }
-        }
-
-        uint32_t ind = 0;
-        for (uint32_t i = 0; i < threadNum; i++) {
-            std::pair<uint32_t, uint32_t> newPair = {ind, ind + work.at(i)};
-            interval.push_back(newPair);
-            ind += work.at(i);
-        }
+        splitWork(contestInput.size(), threadNum, work, interval);
 
         for (int i = 0; i < threadNum; i++) {
             auto t = createThread([i, interval, &promiseVector, contestInput] {
                 for (uint32_t index = interval.at(i).first;
                      index < interval.at(i).second; index++) {
-                    promiseVector.at(index).set_value(calcCollatz
-                                                              (contestInput.at(
-                                                                      index)));
+                    promiseVector.at((int) index).set_value(calcCollatz
+                    (contestInput.at((int) index)));
                 }
             });
             t.detach();
@@ -232,7 +237,14 @@ public:
         ContestResult result;
         result.resize(contestInput.size());
 
-        std::vector<std::future<uint64_t>> futureVector(contestInput.size());
+        auto threadNum = 10; //TODO getSize nie działa
+
+        std::vector<std::future<uint64_t>> futureVector;
+        std::vector<uint32_t> work(threadNum);
+        std::vector<std::pair<uint32_t, uint32_t>> interval;
+
+        splitWork(contestInput.size(), threadNum, work, interval);
+
 
         for (int i = 0; i < contestInput.size(); i++) {
             futureVector.at(i) = pool.push([contestInput, i] {
@@ -251,7 +263,7 @@ public:
 
 private:
     cxxpool::thread_pool pool;
-};
+}; // TODO
 
 class TeamNewProcesses : public Team {
 public:
@@ -261,7 +273,7 @@ public:
     virtual ContestResult runContest(ContestInput const &contestInput);
 
     virtual std::string getInnerName() { return "TeamNewProcesses"; }
-};
+}; // TODO
 
 class TeamConstProcesses : public Team {
 public:
@@ -271,7 +283,7 @@ public:
     virtual ContestResult runContest(ContestInput const &contestInput);
 
     virtual std::string getInnerName() { return "TeamConstProcesses"; }
-};
+}; // TODO
 
 class TeamAsync : public Team {
 public:
@@ -279,21 +291,33 @@ public:
                                                           shareResults) {} // ignore size
 
     virtual ContestResult runContest(ContestInput const &contestInput) {
-        ContestResult result;
-        result.resize(contestInput.size());
-        uint64_t idx = 0;
-        std::vector<std::future<uint64_t>> futureVector(contestInput.size());
 
-        for (int i = 0; i < contestInput.size(); i++) {
-            auto singleInput = contestInput.at(i);
-            futureVector.at(idx) = std::async([singleInput] {
-                return calcCollatz(singleInput);
+        ContestResult result;
+
+        auto threadNum = getSize();
+        std::vector<std::future<std::vector<uint64_t>>> futureVector(threadNum);
+        std::vector<std::vector<uint64_t>> resultVector(threadNum);
+        std::vector<uint32_t> work(threadNum);
+        std::vector<std::pair<uint32_t, uint32_t>> interval;
+
+        splitWork(contestInput.size(), threadNum, work, interval);
+
+        for (int i = 0; i < threadNum; i++) {
+            futureVector.at(i) = std::async([i, interval, contestInput] {
+                std::vector<uint64_t> res;
+                for (uint32_t index = interval.at(i).first;
+                     index < interval.at(i).second; index++) {
+                    res.push_back(calcCollatz(contestInput.at((int) index)));
+                }
+                return res;
             });
-            ++idx;
         }
 
-        for (int i = 0; i < contestInput.size(); i++) {
-            result.at(i) = futureVector.at(i).get();
+        for (int i = 0; i < threadNum; i++) {
+            resultVector.at(i) = futureVector.at(i).get();
+            for(int j = 0; j < resultVector.at(i).size(); i++) {
+                result.push_back(resultVector.at(i).at(j));
+            }
         }
 
         return result;
