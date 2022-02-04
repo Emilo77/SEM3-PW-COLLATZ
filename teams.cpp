@@ -131,78 +131,78 @@
 //    return result;
 //}
 
-ContestResult TeamNewProcesses::runContest(ContestInput const &contestInput) {
-    ContestResult r;
-    //TODO
-    return r;
-}
-
-void calcCollatzProcess(int index, std::vector<std::pair<uint32_t,uint32_t>>
-        interval, std::vector<std::promise<uint64_t>> &promiseVector) {
-
-    for(uint32_t index = interval.at(index).first;
-        index < interval.at(index).second; index++) {
-        promiseVector.at(index).set_value(calcCollatz(index));
-    }
-
-}
-
-ContestResult TeamConstProcesses::runContest(ContestInput const &contestInput) {
-    ContestResult result;
-    result.resize(contestInput.size());
-
-    std::vector<std::promise<uint64_t>> promiseVector(contestInput.size());
-    std::vector<std::future<uint64_t>> futureVector;
-    pid_t pid;
-
-    for (int i = 0; i < contestInput.size(); i++) {
-        futureVector.push_back(promiseVector.at(i).get_future());
-    }
-
-    const uint32_t threadNum = getSize();
-    uint32_t avgWork = contestInput.size() / getSize();
-    std::vector<uint32_t> work(threadNum);
-    std::vector<std::pair<uint32_t, uint32_t>> interval;
-
-    if (contestInput.size() % threadNum == 0) {
-        std::fill(work.begin(), work.end(), avgWork);
-    } else {
-        avgWork++;
-        std::fill(work.begin(), work.end(), avgWork);
-        uint32_t tempWork = avgWork * threadNum;
-        uint32_t index = 0;
-        while (tempWork > contestInput.size()) {
-            work.at(index)--;
-            tempWork--;
-            index++;
-        }
-    }
-
-    uint32_t ind = 0;
-    for (uint32_t i = 0; i < threadNum; i++) {
-        std::pair<uint32_t, uint32_t> newPair = {ind, ind + work.at(i)};
-        interval.push_back(newPair);
-        ind += work.at(i);
-    }
-
-    for(int i = 0; i < threadNum; i++) {
-        switch(pid = fork()){
-            case -1:
-                syserr("fork");
-            case 0:
-                //calcCollatzProcess();
-                //return 0;
-            default:
-                break;
-        }
-    }
-
-    for (int i = 0; i < contestInput.size(); i++) {
-        result.at(i) = futureVector.at(i).get();
-    }
-
-    return result;
-}
+//ContestResult TeamNewProcesses::runContest(ContestInput const &contestInput) {
+//    ContestResult r;
+//    //TODO
+//    return r;
+//}
+//
+//void calcCollatzProcess(int index, std::vector<std::pair<uint32_t,uint32_t>>
+//        interval, std::vector<std::promise<uint64_t>> &promiseVector) {
+//
+//    for(uint32_t index = interval.at(index).first;
+//        index < interval.at(index).second; index++) {
+//        promiseVector.at(index).set_value(calcCollatz(index));
+//    }
+//
+//}
+//
+//ContestResult TeamConstProcesses::runContest(ContestInput const &contestInput) {
+//    ContestResult result;
+//    result.resize(contestInput.size());
+//
+//    std::vector<std::promise<uint64_t>> promiseVector(contestInput.size());
+//    std::vector<std::future<uint64_t>> futureVector;
+//    pid_t pid;
+//
+//    for (int i = 0; i < contestInput.size(); i++) {
+//        futureVector.push_back(promiseVector.at(i).get_future());
+//    }
+//
+//    const uint32_t threadNum = getSize();
+//    uint32_t avgWork = contestInput.size() / getSize();
+//    std::vector<uint32_t> work(threadNum);
+//    std::vector<std::pair<uint32_t, uint32_t>> interval;
+//
+//    if (contestInput.size() % threadNum == 0) {
+//        std::fill(work.begin(), work.end(), avgWork);
+//    } else {
+//        avgWork++;
+//        std::fill(work.begin(), work.end(), avgWork);
+//        uint32_t tempWork = avgWork * threadNum;
+//        uint32_t index = 0;
+//        while (tempWork > contestInput.size()) {
+//            work.at(index)--;
+//            tempWork--;
+//            index++;
+//        }
+//    }
+//
+//    uint32_t ind = 0;
+//    for (uint32_t i = 0; i < threadNum; i++) {
+//        std::pair<uint32_t, uint32_t> newPair = {ind, ind + work.at(i)};
+//        interval.push_back(newPair);
+//        ind += work.at(i);
+//    }
+//
+//    for(int i = 0; i < threadNum; i++) {
+//        switch(pid = fork()){
+//            case -1:
+//                syserr("fork");
+//            case 0:
+//                //calcCollatzProcess();
+//                //return 0;
+//            default:
+//                break;
+//        }
+//    }
+//
+//    for (int i = 0; i < contestInput.size(); i++) {
+//        result.at(i) = futureVector.at(i).get();
+//    }
+//
+//    return result;
+//}
 
 //ContestResult TeamAsync::runContest(ContestInput const &contestInput) {
 //    ContestResult result;

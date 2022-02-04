@@ -1,4 +1,5 @@
 find_package ( Threads REQUIRED )
+PROJECT(_PW_Collatz)
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-g -Wall")

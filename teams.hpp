@@ -2,7 +2,7 @@
 #define TEAMS_HPP
 
 #include <thread>
-#include <assert.h>
+#include <cassert>
 
 #include "lib/rtimers/cxx11.hpp"
 #include "lib/pool/cxxpool.h"
@@ -13,8 +13,9 @@
 #include "err.h"
 
 static void splitWork(const uint32_t contestInputSize, const uint32_t threadNum,
-                      std::vector<uint32_t> &work,
                       std::vector<std::pair<uint32_t, uint32_t>> &interval) {
+
+    std::vector<uint32_t> work((int) threadNum);
     uint32_t avgWork = contestInputSize / threadNum;
     if (contestInputSize % threadNum == 0) {
         std::fill(work.begin(), work.end(), avgWork);
@@ -22,7 +23,7 @@ static void splitWork(const uint32_t contestInputSize, const uint32_t threadNum,
         avgWork++;
         std::fill(work.begin(), work.end(), avgWork);
         uint32_t tempWork = avgWork * threadNum;
-        uint32_t index = 0;
+        auto index = 0;
         while (tempWork > contestInputSize) {
             work.at(index)--;
             tempWork--;
@@ -31,7 +32,7 @@ static void splitWork(const uint32_t contestInputSize, const uint32_t threadNum,
     }
 
     uint32_t ind = 0;
-    for (uint32_t i = 0; i < threadNum; i++) {
+    for (auto i = 0; i < threadNum; i++) {
         std::pair<uint32_t, uint32_t> newPair = {ind, ind + work.at(i)};
         interval.push_back(newPair);
         ind += work.at(i);
@@ -148,8 +149,8 @@ public:
         }
 
         uint64_t threadCount = 0;
-        uint64_t indexToJoin = 0;
-        for (uint64_t i = 0; i < contestInput.size(); i++) {
+        auto indexToJoin = 0;
+        for (auto i = 0; i < contestInput.size(); i++) {
 
             threadCount++;
             threads.push_back(createThread(
@@ -197,7 +198,6 @@ public:
         auto threadNum = getSize();
         std::vector<std::promise<uint64_t>> promiseVector(contestInput.size());
         std::vector<std::future<uint64_t>> futureVector;
-        std::vector<uint32_t> work(threadNum);
         std::vector<std::pair<uint32_t, uint32_t>> interval;
 
 
@@ -205,14 +205,17 @@ public:
             futureVector.push_back(promiseVector.at(i).get_future());
         }
 
-        splitWork(contestInput.size(), threadNum, work, interval);
+        splitWork(contestInput.size(), threadNum, interval);
+
+//        if(!getSharedResults()) {}
 
         for (int i = 0; i < threadNum; i++) {
             auto t = createThread([i, interval, &promiseVector, contestInput] {
                 for (uint32_t index = interval.at(i).first;
                      index < interval.at(i).second; index++) {
                     promiseVector.at((int) index).set_value(calcCollatz
-                    (contestInput.at((int) index)));
+                                                                    (contestInput.at(
+                                                                            (int) index)));
                 }
             });
             t.detach();
@@ -234,26 +237,31 @@ public:
                                                     pool(sizeArg) {}
 
     virtual ContestResult runContest(ContestInput const &contestInput) {
+
         ContestResult result;
-        result.resize(contestInput.size());
-
-        auto threadNum = 10; //TODO getSize nie działa
-
-        std::vector<std::future<uint64_t>> futureVector;
-        std::vector<uint32_t> work(threadNum);
+        int threadNum = (int) 10; //getSize()
+        std::vector<std::future<std::vector<uint64_t>>> futureVector(threadNum);
+        std::vector<std::vector<uint64_t>> resultVector(threadNum);
         std::vector<std::pair<uint32_t, uint32_t>> interval;
 
-        splitWork(contestInput.size(), threadNum, work, interval);
+        splitWork(contestInput.size(), threadNum, interval);
 
-
-        for (int i = 0; i < contestInput.size(); i++) {
-            futureVector.at(i) = pool.push([contestInput, i] {
-                return calcCollatz(contestInput.at(i));
+        for (int i = 0; i < threadNum; i++) {
+            futureVector.at(i) = pool.push([i, interval, contestInput] {
+                std::vector<uint64_t> res;
+                for (uint32_t index = interval.at(i).first;
+                     index < interval.at(i).second; index++) {
+                    res.push_back(calcCollatz(contestInput.at((int) index)));
+                }
+                return res;
             });
         }
 
-        for (int i = 0; i < contestInput.size(); i++) {
-            result.at(i) = futureVector.at(i).get();
+        for (int i = 0; i < threadNum; i++) {
+            resultVector.at(i) = futureVector.at(i).get();
+            for (auto &j: resultVector.at(i)) {
+                result.push_back(j);
+            }
         }
 
         return result;
@@ -270,7 +278,10 @@ public:
     TeamNewProcesses(uint32_t sizeArg, bool shareResults) : Team(sizeArg,
                                                                  shareResults) {}
 
-    virtual ContestResult runContest(ContestInput const &contestInput);
+    virtual ContestResult runContest(ContestInput const &contestInput) {
+        ContestResult result;
+        return result;
+    }
 
     virtual std::string getInnerName() { return "TeamNewProcesses"; }
 }; // TODO
@@ -280,7 +291,10 @@ public:
     TeamConstProcesses(uint32_t sizeArg, bool shareResults) : Team(sizeArg,
                                                                    shareResults) {}
 
-    virtual ContestResult runContest(ContestInput const &contestInput);
+    virtual ContestResult runContest(ContestInput const &contestInput) {
+        ContestResult result;
+        return result;
+    }
 
     virtual std::string getInnerName() { return "TeamConstProcesses"; }
 }; // TODO
@@ -293,14 +307,12 @@ public:
     virtual ContestResult runContest(ContestInput const &contestInput) {
 
         ContestResult result;
-
-        auto threadNum = getSize();
+        int threadNum = (int) getSize();
         std::vector<std::future<std::vector<uint64_t>>> futureVector(threadNum);
         std::vector<std::vector<uint64_t>> resultVector(threadNum);
-        std::vector<uint32_t> work(threadNum);
         std::vector<std::pair<uint32_t, uint32_t>> interval;
 
-        splitWork(contestInput.size(), threadNum, work, interval);
+        splitWork(contestInput.size(), threadNum, interval);
 
         for (int i = 0; i < threadNum; i++) {
             futureVector.at(i) = std::async([i, interval, contestInput] {
@@ -315,8 +327,8 @@ public:
 
         for (int i = 0; i < threadNum; i++) {
             resultVector.at(i) = futureVector.at(i).get();
-            for(int j = 0; j < resultVector.at(i).size(); i++) {
-                result.push_back(resultVector.at(i).at(j));
+            for (auto &j: resultVector.at(i)) {
+                result.push_back(j);
             }
         }
 
