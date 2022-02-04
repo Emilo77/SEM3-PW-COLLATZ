@@ -207,19 +207,22 @@ public:
 
         splitWork(contestInput.size(), threadNum, interval);
 
-//        if(!getSharedResults()) {}
+        if(!getSharedResults()) {
+            for (int i = 0; i < threadNum; i++) {
+                auto t = createThread([i, interval, &promiseVector, contestInput] {
+                    for (uint32_t index = interval.at(i).first;
+                         index < interval.at(i).second; index++) {
+                        promiseVector.at((int) index).set_value(calcCollatz
+                        (contestInput.at((int) index)));
+                    }
+                });
+                t.detach();
+            }
+        } else {
 
-        for (int i = 0; i < threadNum; i++) {
-            auto t = createThread([i, interval, &promiseVector, contestInput] {
-                for (uint32_t index = interval.at(i).first;
-                     index < interval.at(i).second; index++) {
-                    promiseVector.at((int) index).set_value(calcCollatz
-                                                                    (contestInput.at(
-                                                                            (int) index)));
-                }
-            });
-            t.detach();
         }
+
+
 
         for (int i = 0; i < contestInput.size(); i++) {
             result.at(i) = futureVector.at(i).get();
