@@ -5,8 +5,11 @@
 
 class SharedResults {
 
-//    public: SharedResults() {
-//    }
+public:
+    SharedResults() {
+
+    }
+
     std::map<InfInt, uint64_t> map;
 };
 

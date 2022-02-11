@@ -134,44 +134,7 @@ public:
         ContestResult result;
         result.resize(contestInput.size());
 
-        if (getSize() == 0) {
-            return result; // czy getsize może być równe 0?
-        }
-
-        std::vector<std::promise<uint64_t>> promiseVector(contestInput.size());
-        std::vector<std::future<uint64_t>> futureVector;
-        std::vector<std::thread> threads;
-
-        uint64_t size = getSize();
-
-        for (int i = 0; i < contestInput.size(); i++) {
-            futureVector.push_back(promiseVector.at(i).get_future());
-        }
-
-        uint64_t threadCount = 0;
-        auto indexToJoin = 0;
-        for (auto i = 0; i < contestInput.size(); i++) {
-
-            threadCount++;
-            threads.push_back(createThread(
-                    [i, &promiseVector, contestInput] {
-                        promiseVector.at(i).set_value(
-                                calcCollatz(contestInput.at(i)));
-                    }));
-            if (threadCount == size) {
-                threads.at(indexToJoin).join();
-                indexToJoin++;
-                threadCount--;
-            }
-        }
-        while (indexToJoin < contestInput.size()) {
-            threads.at(indexToJoin).join();
-            indexToJoin++;
-        }
-
-        for (int i = 0; i < contestInput.size(); i++) {
-            result.at(i) = futureVector.at(i).get();
-        }
+        //TODO
 
         return result;
     }
@@ -199,6 +162,7 @@ public:
         std::vector<std::promise<uint64_t>> promiseVector(contestInput.size());
         std::vector<std::future<uint64_t>> futureVector;
         std::vector<std::pair<uint32_t, uint32_t>> interval;
+        bool teamX = (bool) getSharedResults();
 
 
         for (int i = 0; i < contestInput.size(); i++) {
@@ -207,21 +171,24 @@ public:
 
         splitWork(contestInput.size(), threadNum, interval);
 
-        if(!getSharedResults()) {
-            for (int i = 0; i < threadNum; i++) {
-                auto t = createThread([i, interval, &promiseVector, contestInput] {
-                    for (uint32_t index = interval.at(i).first;
-                         index < interval.at(i).second; index++) {
-                        promiseVector.at((int) index).set_value(calcCollatz
-                        (contestInput.at((int) index)));
-                    }
-                });
-                t.detach();
-            }
-        } else {
-
+        for (int i = 0; i < threadNum; i++) {
+            auto t = createThread(
+                    [i, &interval, &promiseVector, &contestInput, &teamX] {
+                        for (uint32_t index = interval.at(i).first;
+                             index < interval.at(i).second; index++) {
+                            if(teamX) {
+                                promiseVector.at((int) index).set_value(
+                                        calcCollatzShared(contestInput.at((int)
+                                        index)));
+                            } else {
+                                promiseVector.at((int) index).set_value(
+                                        calcCollatz(contestInput.at((int)
+                                        index)));
+                            }
+                        }
+                    });
+            t.detach();
         }
-
 
 
         for (int i = 0; i < contestInput.size(); i++) {
@@ -242,19 +209,27 @@ public:
     virtual ContestResult runContest(ContestInput const &contestInput) {
 
         ContestResult result;
-        int threadNum = (int) 10; //getSize()
+        int threadNum = getSize();
         std::vector<std::future<std::vector<uint64_t>>> futureVector(threadNum);
         std::vector<std::vector<uint64_t>> resultVector(threadNum);
         std::vector<std::pair<uint32_t, uint32_t>> interval;
+        bool teamX = (bool) getSharedResults();
 
         splitWork(contestInput.size(), threadNum, interval);
 
         for (int i = 0; i < threadNum; i++) {
-            futureVector.at(i) = pool.push([i, interval, contestInput] {
+            futureVector.at(i) = pool.push([i, &interval, &contestInput,
+                                                   &teamX] {
                 std::vector<uint64_t> res;
                 for (uint32_t index = interval.at(i).first;
                      index < interval.at(i).second; index++) {
-                    res.push_back(calcCollatz(contestInput.at((int) index)));
+                    if (teamX) {
+                        res.push_back(calcCollatzShared(contestInput.at((int)
+                        index)));
+                    } else {
+                        res.push_back(calcCollatz(contestInput.at((int)
+                        index)));
+                    }
                 }
                 return res;
             });
@@ -274,7 +249,7 @@ public:
 
 private:
     cxxpool::thread_pool pool;
-}; // TODO
+};
 
 class TeamNewProcesses : public Team {
 public:
@@ -287,7 +262,7 @@ public:
     }
 
     virtual std::string getInnerName() { return "TeamNewProcesses"; }
-}; // TODO
+};
 
 class TeamConstProcesses : public Team {
 public:
@@ -300,7 +275,7 @@ public:
     }
 
     virtual std::string getInnerName() { return "TeamConstProcesses"; }
-}; // TODO
+};
 
 class TeamAsync : public Team {
 public:
@@ -314,15 +289,23 @@ public:
         std::vector<std::future<std::vector<uint64_t>>> futureVector(threadNum);
         std::vector<std::vector<uint64_t>> resultVector(threadNum);
         std::vector<std::pair<uint32_t, uint32_t>> interval;
+        bool teamX = (bool) getSharedResults();
 
         splitWork(contestInput.size(), threadNum, interval);
 
         for (int i = 0; i < threadNum; i++) {
-            futureVector.at(i) = std::async([i, interval, contestInput] {
+            futureVector.at(i) = std::async([i, &interval, &contestInput,
+                                                    &teamX] {
                 std::vector<uint64_t> res;
                 for (uint32_t index = interval.at(i).first;
                      index < interval.at(i).second; index++) {
-                    res.push_back(calcCollatz(contestInput.at((int) index)));
+                    if (teamX) {
+                        res.push_back(calcCollatzShared(contestInput.at((int)
+                                                                                index)));
+                    } else {
+                        res.push_back(calcCollatz(contestInput.at((int)
+                                                                          index)));
+                    }
                 }
                 return res;
             });
